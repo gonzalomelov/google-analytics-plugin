@@ -27,6 +27,9 @@ To track a Screen (PageView):
 To track an Event:
 * `analytics.trackEvent('Category', 'Action', 'Label', Value)` Label and Value are optional, Value is numeric
 
+To track an Exception:
+* `analytics.trackException('Description', Fatal)` Description can be null or up to 100 characters, Fatal is boolean
+
 #Installing Without the CLI <a name="nocli"></a>
 Copy the files manually into your project and add the following to your config.xml files:
 ```xml
