@@ -10,6 +10,7 @@
 	NSMutableDictionary *_customDimensions;
 }
 
+- (void) startTracker: (CDVInvokedUrlCommand*)command;
 - (void) startTrackerWithId: (CDVInvokedUrlCommand*)command;
 - (void) addCustomDimension: (CDVInvokedUrlCommand*)command;
 - (void) trackEvent: (CDVInvokedUrlCommand*)command;

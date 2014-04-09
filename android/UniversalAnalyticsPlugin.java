@@ -6,6 +6,7 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Logger.LogLevel;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
+import com.google.analytics.tracking.android.ExceptionReporter;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
@@ -16,19 +17,27 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 public class UniversalAnalyticsPlugin extends CordovaPlugin {
     public static final String START_TRACKER = "startTrackerWithId";
+    public static final String START_TRACKER_WITH_OPTIONS = "startTracker";
     public static final String ADD_DIMENSION = "addCustomDimension";
     public static final String TRACK_VIEW = "trackView";
-    public static final String TRACK_EXCEPTION = "trackException";
     public static final String TRACK_EVENT = "trackEvent";
     public Boolean trackerStarted = false;
     public HashMap<String, String> customDimensions = new HashMap<String, String>();
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        if (START_TRACKER.equals(action)) {
+        if (START_TRACKER_WITH_OPTIONS.equals(action)) {
+            String id = args.getString(0);
+            Boolean trackUncaughtExceptions = args.isNull(1) ? null : args.getBoolean(1);
+            Integer trackInterval = args.isNull(2) ? null : args.getInt(2);
+            Boolean dryRun = args.isNull(3) ? null : args.getBoolean(3);
+            this.startTracker(id, trackUncaughtExceptions, trackInterval, dryRun, callbackContext);
+            return true;
+        } else if (START_TRACKER.equals(action)) {
             String id = args.getString(0);
             this.startTracker(id, callbackContext);
             return true;
@@ -52,28 +61,42 @@ public class UniversalAnalyticsPlugin extends CordovaPlugin {
                     callbackContext);
             }
             return true;
-        } else if (TRACK_EXCEPTION.equals(action)) {
-            String description = args.getString(0);
-            boolean fatal = args.getBoolean(1);
-            this.trackException(description, fatal, callbackContext);
-            return true;
         }
         return false;
     }
 
     @SuppressWarnings("deprecation")
-    private void startTracker(String id, CallbackContext callbackContext) {
+    private void startTracker(String id, Boolean trackUncaughtExceptions, Integer trackInterval, Boolean dryRun, CallbackContext callbackContext) {
         if (null != id && id.length() > 0) {
-            GoogleAnalytics.getInstance(this.cordova.getActivity()).getTracker(id);
+            Tracker tracker = GoogleAnalytics.getInstance(this.cordova.getActivity()).getTracker(id);
+            if (trackUncaughtExceptions) {
+                UncaughtExceptionHandler exceptionHandler = new ExceptionReporter(
+                    tracker,
+                    GAServiceManager.getInstance(),
+                    Thread.getDefaultUncaughtExceptionHandler(),
+                    this.cordova.getActivity());
+                Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
+            }
+            if (dryRun != null) {
+                GoogleAnalytics.getInstance(this.cordova.getActivity()).setDryRun(true);
+            }
+            if (trackInterval == null) {
+                trackInterval = 30; //deprecated but whatcha gonna do? set dispatch period to 30 sec
+            }
+            GAServiceManager.getInstance().setLocalDispatchPeriod(trackInterval); //deprecated but whatcha gonna do? set dispatch period to 30 sec
             callbackContext.success("tracker started");
             trackerStarted = true;
-            GAServiceManager.getInstance().setLocalDispatchPeriod(30); //deprecated but whatcha gonna do? set dispatch period to 30 sec
          // Set the log level to verbose.
           /*GoogleAnalytics.getInstance(this.cordova.getActivity()).getLogger()
                 .setLogLevel(LogLevel.VERBOSE);*/
         } else {
             callbackContext.error("tracker id is not valid");
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void startTracker(String id, CallbackContext callbackContext) {
+        this.startTracker(id, null, null, null, callbackContext);
     }
 
     private void addCustomDimension(String key, String value, CallbackContext callbackContext) {
@@ -134,24 +157,5 @@ public class UniversalAnalyticsPlugin extends CordovaPlugin {
             callbackContext.error("Expected non-empty string arguments.");
         }
     }
-
-    private void trackException(String description, boolean fatal, CallbackContext callbackContext) {
-        if (!trackerStarted) {
-            callbackContext.error("Tracker not started");
-            return;
-        }
-
-        if (description == null || description.length() <= 100) {
-            Tracker tracker = GoogleAnalytics.getInstance(this.cordova.getActivity()).getDefaultTracker();
-            tracker.send(MapBuilder
-                    .createException(description, fatal)
-                    .build()
-            );
-            callbackContext.success("Track Exception: " + description);
-        } else {
-            callbackContext.error("Expected description up to 100 characters.");
-        }
-    }
-
 }
 
