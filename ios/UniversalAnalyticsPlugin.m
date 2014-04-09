@@ -123,5 +123,28 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void) trackException: (CDVInvokedUrlCommand*)command
+{
+    static const NSInteger MAX_DESCRIPTION_LENGTH = 100;
+    
+    CDVPluginResult* pluginResult = nil;
+    if ( ! _trackerStarted) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Tracker not started"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+    
+    NSString *description = [command.arguments objectAtIndex:0];
+    NSNumber *isFatal = [command.arguments objectAtIndex:1];
+    
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [self addCustomDimensionsToTracker:tracker];
+    
+    [tracker send:[[GAIDictionaryBuilder createExceptionWithDescription:[description substringToIndex:MIN(MAX_DESCRIPTION_LENGTH, description.length)] withFatal:isFatal] build]];
+    
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 @end
 
