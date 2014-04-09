@@ -23,6 +23,9 @@ public class UniversalAnalyticsPlugin extends CordovaPlugin {
     public static final String TRACK_VIEW = "trackView";
     public static final String TRACK_EXCEPTION = "trackException";
     public static final String TRACK_EVENT = "trackEvent";
+
+    public static final int MAX_DESCRIPTION_LENGTH = 100;
+    
     public Boolean trackerStarted = false;
     public HashMap<String, String> customDimensions = new HashMap<String, String>();
 
@@ -141,7 +144,7 @@ public class UniversalAnalyticsPlugin extends CordovaPlugin {
             return;
         }
 
-        if (description == null || description.length() <= 100) {
+        if (description == null || description.length() <= MAX_DESCRIPTION_LENGTH) {
             Tracker tracker = GoogleAnalytics.getInstance(this.cordova.getActivity()).getDefaultTracker();
             tracker.send(MapBuilder
                     .createException(description, fatal)
