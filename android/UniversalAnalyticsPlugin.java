@@ -78,7 +78,7 @@ public class UniversalAnalyticsPlugin extends CordovaPlugin {
                 Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
             }
             if (dryRun != null) {
-                GoogleAnalytics.getInstance(this.cordova.getActivity()).setDryRun(true);
+                GoogleAnalytics.getInstance(this.cordova.getActivity()).setDryRun(dryRun);
             }
             if (trackInterval == null) {
                 trackInterval = 30; //deprecated but whatcha gonna do? set dispatch period to 30 sec
