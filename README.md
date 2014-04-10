@@ -21,6 +21,13 @@ If you are not using the CLI, follow the steps in the section [Installing Withou
 In your 'deviceready' handler, set up your Analytics tracker:
 * `analytics.startTrackerWithId('UA-XXXX-YY')` where UA-XXXX-YY is your Google Analytics Mobile App property
 
+or
+
+* `analytics.startTracker('UA-XXXX-YY', settings)` where `settings` is an object with this optionals fields:
+    * `trackUncaughtExceptions`: set to YES to sent automatically uncaught exceptions to Google Analytics.
+    * `dryRun`: set to YES prevents any data from being sent to Google Analytics.
+    * `trackInterval`: the tracking information will be automatically dispatched every 10 seconds. This value if it is specified should be greater than cero, otherwise, tracking information must be sent manually, and this plugin has not this functionality for the moment :)
+
 To track a Screen (PageView):
 * `analytics.trackView('Screen Title')`
 
