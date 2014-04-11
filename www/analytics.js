@@ -21,5 +21,9 @@ UniversalAnalyticsPlugin.prototype.trackEvent = function(category, action, label
   cordova.exec(function() {}, function() {}, 'UniversalAnalytics', 'trackEvent', [category, action, label, value]);
 };
 
+UniversalAnalyticsPlugin.prototype.trackException = function(description, fatal) {
+  cordova.exec(function() {}, function() {}, 'UniversalAnalytics', 'trackException', [description, fatal]);
+};
+
 module.exports = new UniversalAnalyticsPlugin();
 

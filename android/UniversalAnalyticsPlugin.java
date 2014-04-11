@@ -25,6 +25,8 @@ public class UniversalAnalyticsPlugin extends CordovaPlugin {
     public static final String ADD_DIMENSION = "addCustomDimension";
     public static final String TRACK_VIEW = "trackView";
     public static final String TRACK_EVENT = "trackEvent";
+    public static final String TRACK_EXCEPTION = "trackException";
+
     public Boolean trackerStarted = false;
     public HashMap<String, String> customDimensions = new HashMap<String, String>();
 
@@ -60,6 +62,11 @@ public class UniversalAnalyticsPlugin extends CordovaPlugin {
                     length > 3 ? args.getLong(3) : 0, 
                     callbackContext);
             }
+            return true;
+        } else if (TRACK_EXCEPTION.equals(action)) {
+            String description = args.getString(0);
+            boolean fatal = args.getBoolean(1);
+            this.trackException(description, fatal, callbackContext);
             return true;
         }
         return false;
@@ -138,11 +145,10 @@ public class UniversalAnalyticsPlugin extends CordovaPlugin {
     }
 
     private void trackEvent(String category, String action, String label, long value, CallbackContext callbackContext) {
-    if (! trackerStarted ) {
-        callbackContext.error("Tracker not started");
-        return;
-    }
-
+        if (! trackerStarted ) {
+            callbackContext.error("Tracker not started");
+            return;
+        }
 
         Tracker tracker = GoogleAnalytics.getInstance(this.cordova.getActivity()).getDefaultTracker();
         addCustomDimensionsToTracker(tracker);
@@ -155,6 +161,24 @@ public class UniversalAnalyticsPlugin extends CordovaPlugin {
             callbackContext.success("Track Event: " + category);
         } else {
             callbackContext.error("Expected non-empty string arguments.");
+        }
+    }
+
+    private void trackException(String description, boolean fatal, CallbackContext callbackContext) {
+        if (!trackerStarted) {
+            callbackContext.error("Tracker not started");
+            return;
+        }
+
+        if (description == null || description.length() <= 100) {
+            Tracker tracker = GoogleAnalytics.getInstance(this.cordova.getActivity()).getDefaultTracker();
+            tracker.send(MapBuilder
+                    .createException(description, fatal)
+                    .build()
+            );
+            callbackContext.success("Track Exception: " + description);
+        } else {
+            callbackContext.error("Expected description up to 100 characters.");
         }
     }
 }
