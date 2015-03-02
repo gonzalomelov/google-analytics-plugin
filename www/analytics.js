@@ -1,29 +1,71 @@
-function UniversalAnalyticsPlugin() {};
+function UniversalAnalyticsPlugin() {}
 
 UniversalAnalyticsPlugin.prototype.startTracker = function(id, options) {
     options = options || {};
     cordova.exec(function() {}, function() {}, 'UniversalAnalytics', 'startTracker', [id, options.trackUncaughtExceptions, options.trackInterval, options.dryRun]);
 };
- 
-UniversalAnalyticsPlugin.prototype.startTrackerWithId = function(id) {
-  cordova.exec(function() {}, function() {}, 'UniversalAnalytics', 'startTrackerWithId', [id]);
+
+UniversalAnalyticsPlugin.prototype.startTrackerWithId = function(id, success, error) {
+  cordova.exec(success, error, 'UniversalAnalytics', 'startTrackerWithId', [id]);
 };
 
-UniversalAnalyticsPlugin.prototype.trackView = function(screen) {
-  cordova.exec(function() {}, function() {}, 'UniversalAnalytics', 'trackView', [screen]);
+UniversalAnalyticsPlugin.prototype.setUserId = function(id, success, error) {
+  cordova.exec(success, error, 'UniversalAnalytics', 'setUserId', [id]);
 };
 
-UniversalAnalyticsPlugin.prototype.addCustomDimension = function(key, value) {
-  cordova.exec(function() {}, function() {}, 'UniversalAnalytics', 'addCustomDimension', [key, value]);
+/* enables verbose logging */
+UniversalAnalyticsPlugin.prototype.debugMode = function(success, error) {
+  cordova.exec(success, error, 'UniversalAnalytics', 'debugMode', []);
 };
 
-UniversalAnalyticsPlugin.prototype.trackEvent = function(category, action, label, value) {
-  cordova.exec(function() {}, function() {}, 'UniversalAnalytics', 'trackEvent', [category, action, label, value]);
+UniversalAnalyticsPlugin.prototype.trackView = function(screen, success, error) {
+  cordova.exec(success, error, 'UniversalAnalytics', 'trackView', [screen]);
 };
 
-UniversalAnalyticsPlugin.prototype.trackException = function(description, fatal) {
-  cordova.exec(function() {}, function() {}, 'UniversalAnalytics', 'trackException', [description, fatal]);
+UniversalAnalyticsPlugin.prototype.addCustomDimension = function(key, value, success, error) {
+  cordova.exec(success, error, 'UniversalAnalytics', 'addCustomDimension', [key, value]);
+};
+
+UniversalAnalyticsPlugin.prototype.trackEvent = function(category, action, label, value, success, error) {
+  if (typeof label === 'undefined' || label === null) {
+    label = '';
+  }
+  if (typeof value === 'undefined' || value === null) {
+    value = 0;
+  }
+
+  cordova.exec(success, error, 'UniversalAnalytics', 'trackEvent', [category, action, label, value]);
+};
+
+/**
+ * https://developers.google.com/analytics/devguides/collection/android/v3/exceptions
+ */
+UniversalAnalyticsPlugin.prototype.trackException = function(description, fatal, success, error) {
+  cordova.exec(success, error, 'UniversalAnalytics', 'trackException', [description, fatal]);
+};
+
+UniversalAnalyticsPlugin.prototype.trackTiming = function(category, intervalInMilliseconds, name, label, success, error) {
+  if (typeof intervalInMilliseconds === 'undefined' || intervalInMilliseconds === null) {
+    intervalInMilliseconds = 0;
+  }
+  if (typeof name === 'undefined' || name === null) {
+    name = '';
+  }
+  if (typeof label === 'undefined' || label === null) {
+    label = '';
+  }
+
+  cordova.exec(success, error, 'UniversalAnalytics', 'trackTiming', [category, intervalInMilliseconds, name, label]);
+};
+
+/* Google Analytics e-Commerce Tracking */
+/* https://developers.google.com/analytics/devguides/collection/analyticsjs/ecommerce */
+UniversalAnalyticsPlugin.prototype.addTransaction = function(transactionId, affiliation, revenue, tax, shipping, currencyCode, success, error) {
+  cordova.exec(success, error, 'UniversalAnalytics', 'addTransaction', [transactionId, affiliation, revenue, tax, shipping, currencyCode]);
+};
+
+UniversalAnalyticsPlugin.prototype.addTransactionItem = function(transactionId, name ,sku, category, price, quantity, currencyCode, success, error) {
+  cordova.exec(success, error, 'UniversalAnalytics', 'addTransactionItem', [transactionId, name ,sku, category, price, quantity, currencyCode]);
 };
 
 module.exports = new UniversalAnalyticsPlugin();
-

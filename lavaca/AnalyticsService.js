@@ -45,6 +45,12 @@ define(function(require) {
         });
       }
     },
+    setUserId: function() {
+      throw 'setUserId is not implemented for Lavaca';
+    },
+    debugMode: function() {
+      throw 'debugMode is not implemented for Lavaca';
+    },
     trackEvent: function(category, action, label, value) {
       action = action || '';
       label = label || '';
@@ -65,6 +71,29 @@ define(function(require) {
           'eventAction': action,
           'eventLabel': label,
           'eventValue': value
+        });
+      }
+    },
+    trackTiming: function(category, intervalInMilliseconds, name, label) {
+      action = action || '';
+      label = label || '';
+      value = value || 0;
+      if (Device.isCordova()) {
+        if (this.ready) {
+          analytics.trackTiming(category, intervalInMilliseconds, name, label);
+        } else {
+          this.queue.push({
+            action: 'trackTiming',
+            params: [category, intervalInMilliseconds, name, label]
+          });
+        }
+      } else if (this.isWeb) {
+        ga('send', {
+          'hitType': 'timing',
+          'timingCategory': category,
+          'timingValue': intervalInMilliseconds,
+          'timingVar': name,
+          'timingLabel': label
         });
       }
     },

@@ -19,7 +19,7 @@ If you are not using the CLI, follow the steps in the section [Installing Withou
 
 #JavaScript Usage
 In your 'deviceready' handler, set up your Analytics tracker:
-* `analytics.startTrackerWithId('UA-XXXX-YY')` where UA-XXXX-YY is your Google Analytics Mobile App property
+* `window.analytics.startTrackerWithId('UA-XXXX-YY')` where UA-XXXX-YY is your Google Analytics Mobile App property
 
 or
 
@@ -29,10 +29,31 @@ or
     * `trackInterval`: the tracking information will be automatically dispatched every 10 seconds. This value if it is specified should be greater than cero, otherwise, tracking information must be sent manually, and this plugin has not this functionality for the moment :)
 
 To track a Screen (PageView):
-* `analytics.trackView('Screen Title')`
+* `window.analytics.trackView('Screen Title')`
 
 To track an Event:
-* `analytics.trackEvent('Category', 'Action', 'Label', Value)` Label and Value are optional, Value is numeric
+* `window.analytics.trackEvent('Category', 'Action', 'Label', Value)` Label and Value are optional, Value is numeric
+
+To track an Exception:
+* `window.analytics.trackException('Description', Fatal)` where Fatal is boolean
+
+To track User Timing (App Speed):
+* `window.analytics.trackTiming('Category', IntervalInMilliseconds, 'Variable', 'Label')` where IntervalInMilliseconds is numeric
+
+To add a Transaction (Ecommerce)
+* `window.analytics.addTransaction('ID', 'Affiliation', Revenue, Tax, Shipping, 'Currency Code')` where Revenue, Tax, and Shipping are numeric
+
+To add a Transaction Item (Ecommerce)
+* `window.analytics.addTransactionItem('ID', 'Name', 'SKU', 'Category', Price, Quantity, 'Currency Code')` where Price and Quantity are numeric
+
+To add a Custom Dimension
+* `window.analytics.addCustomDimension('Key', 'Value', success, error)`
+
+To set a UserId:
+* `window.analytics.setUserId('my-user-id')`
+
+To enable verbose logging:
+* `window.analytics.debugMode()`
 
 To track an Exception:
 * `analytics.trackException('Description', Fatal)` Description can be null or up to 100 characters, Fatal is boolean
@@ -62,8 +83,9 @@ The `lavaca` directory includes a component that can be added to a <a href="http
 * In your config files (`local.json`, `staging.json`, `production.js`) create properties called `google_analytics_id` (for the Mobile App UA property) and `google_analytics_web_id` (for the Web UA property) and set the appropriate IDs or leave blank as needed.
 * In any file you want to track screen views or events, require AnalyticsService and use the methods provided.
 
-```
+```javascript
 var analyticsService = require('app/data/AnalyticsService');
 
 analyticsService.trackView('Home');
 ```
+
